@@ -1,0 +1,38 @@
+--- /tmp/clean_platform_surfaceless.c	2026-09-28 16:30:33.127320243 -0400
++++ src/egl/drivers/dri2/platform_surfaceless.c	2026-09-28 16:21:18.856568890 -0400
+@@ -228,6 +228,21 @@
+    _EGLDevice *dev_list = _eglGlobal.DeviceList;
+    drmDevicePtr device;
+ 
++   if (getenv("SVGA_VLKN_WINSYS")) {
++      dri2_dpy->fd_render_gpu = -1;
++      dri2_dpy->fd_display_gpu = -1;
++      dri2_dpy->driver_name = strdup("vmwgfx");
++      if (!dri2_dpy->driver_name)
++         return false;
++      dri2_dpy->loader_extensions = swrast_loader_extensions;
++      if (!dri2_create_screen(disp)) {
++         free(dri2_dpy->driver_name);
++         dri2_dpy->driver_name = NULL;
++         return false;
++      }
++      return true;
++   }
++
+    while (dev_list) {
+       if (!_eglDeviceSupports(dev_list, _EGL_DEVICE_DRM))
+          goto next;
+@@ -354,7 +369,12 @@
+    disp->Device = device;
+    assert(disp->Device);
+ 
+-   dri2_dpy->driver_name = strdup(disp->Options.Zink ? "zink" : "swrast");
++   if (disp->Options.Zink)
++      dri2_dpy->driver_name = strdup("zink");
++   else if (getenv("SVGA_VLKN_WINSYS"))
++      dri2_dpy->driver_name = strdup("vmwgfx");
++   else
++      dri2_dpy->driver_name = strdup("swrast");
+    if (!dri2_dpy->driver_name)
+       return false;
+ 

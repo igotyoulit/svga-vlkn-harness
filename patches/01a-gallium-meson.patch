@@ -1,0 +1,12 @@
+--- a/src/gallium/meson.build
++++ b/src/gallium/meson.build
+@@ -164,6 +164,9 @@
+   if not with_platform_windows
+      subdir('winsys/svga/drm')
+   endif
++  if get_option('svga-vlkn-dir') != ''
++     subdir('winsys/svga/vlkn')
++  endif
+   subdir('drivers/svga')
+ else
+   driver_svga = declare_dependency()

@@ -1,0 +1,20 @@
+--- a/src/gallium/drivers/svga/meson.build
++++ b/src/gallium/drivers/svga/meson.build
+@@ -83,8 +83,16 @@
+ if not with_platform_windows
+   svga_deps += libsvgadrm
+ endif
++if get_option('svga-vlkn-dir') != ''
++  svga_deps += libsvgavlkn
++endif
++
++svga_compile_args = ['-DGALLIUM_VMWGFX']
++if get_option('svga-vlkn-dir') != ''
++  svga_compile_args += ['-DSVGA_VLKN_WINSYS']
++endif
+ 
+ driver_svga = declare_dependency(
+-  compile_args : '-DGALLIUM_VMWGFX',
++  compile_args : svga_compile_args,
+   link_with : svga_deps,
+ )

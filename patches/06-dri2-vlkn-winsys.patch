@@ -1,0 +1,27 @@
+--- /tmp/clean_dri2.c	2026-09-28 16:30:33.120320243 -0400
++++ src/gallium/frontends/dri/dri2.c	2026-09-28 16:30:03.565086613 -0400
+@@ -51,6 +51,10 @@
+ #include "main/texobj.h"
+ 
+ #include "dri_util.h"
++#include <stdio.h>
++struct svga_winsys_screen;
++struct svga_winsys_screen *svga_vlkn_winsys_screen_create(void);
++struct pipe_screen *svga_screen_create(struct svga_winsys_screen *sws);
+ 
+ #include "dri_helpers.h"
+ #include "dri_drawable.h"
+@@ -1710,7 +1714,12 @@
+    screen->can_share_buffer = true;
+ 
+ #ifdef HAVE_LIBDRM
+-   if (pipe_loader_drm_probe_fd(&screen->dev, screen->fd, false))
++   if (screen->fd < 0 && getenv("SVGA_VLKN_WINSYS")) {
++      struct svga_winsys_screen *sws = svga_vlkn_winsys_screen_create();
++      if (sws) {
++         pscreen = svga_screen_create(sws);
++      }
++   } else if (pipe_loader_drm_probe_fd(&screen->dev, screen->fd, false))
+       pscreen = pipe_loader_create_screen(screen->dev, driver_name_is_inferred);
+ #endif
+ 

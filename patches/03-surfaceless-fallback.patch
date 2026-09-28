@@ -1,0 +1,16 @@
+--- a/src/egl/drivers/dri2/platform_surfaceless.c
++++ b/src/egl/drivers/dri2/platform_surfaceless.c
+@@ -354,7 +354,12 @@
+    disp->Device = device;
+    assert(disp->Device);
+ 
+-   dri2_dpy->driver_name = strdup(disp->Options.Zink ? "zink" : "swrast");
++   if (disp->Options.Zink)
++      dri2_dpy->driver_name = strdup("zink");
++   else if (getenv("SVGA_VLKN_WINSYS"))
++      dri2_dpy->driver_name = strdup("vmwgfx");
++   else
++      dri2_dpy->driver_name = strdup("swrast");
+    if (!dri2_dpy->driver_name)
+       return false;
+ 

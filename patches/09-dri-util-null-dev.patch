@@ -1,0 +1,10 @@
+--- /tmp/clean_dri_util.c	2026-09-28 16:30:33.141320244 -0400
++++ src/gallium/frontends/dri/dri_util.c	2026-09-28 16:30:03.560076747 -0400
+@@ -41,6 +41,7 @@
+ 
+ #include <stdbool.h>
+ #include "dri_util.h"
++#include <stdio.h>
+ #include "dri_context.h"
+ #include "dri_screen.h"
+ #include "dri_drawable.h"

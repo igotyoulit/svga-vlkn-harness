@@ -1,0 +1,38 @@
+--- /tmp/clean_dri_screen.c	2026-09-28 16:30:33.134320243 -0400
++++ src/gallium/frontends/dri/dri_screen.c	2026-09-28 16:30:03.562523998 -0400
+@@ -30,6 +30,7 @@
+  */
+ 
+ #include "dri_screen.h"
++#include <stdio.h>
+ #include "dri_context.h"
+ #include "dri_helpers.h"
+ 
+@@ -63,6 +64,11 @@
+ void
+ dri_init_options(struct dri_screen *screen)
+ {
++   if (!screen->dev) {
++      memset(&screen->options, 0, sizeof(screen->options));
++      return;
++   }
++
+    pipe_loader_config_options(screen->dev);
+ 
+    struct st_config_options *options = &screen->options;
+@@ -354,12 +360,12 @@
+ 
+    static const bool db_modes[] = { false, true };
+ 
+-   if (!driQueryOptionb(&screen->dev->option_cache, "always_have_depth_buffer"))
++   if (!screen->dev || !driQueryOptionb(&screen->dev->option_cache, "always_have_depth_buffer"))
+       zs_formats[num_zs_formats++] = PIPE_FORMAT_NONE;
+ 
+    allow_rgba_ordering = dri_loader_get_cap(screen, DRI_LOADER_CAP_RGBA_ORDERING);
+-   allow_rgb10 = driQueryOptionb(&screen->dev->option_cache, "allow_rgb10_configs");
+-   allow_rgb16 = driQueryOptionb(&screen->dev->option_cache, "allow_rgb16_configs");
++   allow_rgb10 = screen->dev ? driQueryOptionb(&screen->dev->option_cache, "allow_rgb10_configs") : false;
++   allow_rgb16 = screen->dev ? driQueryOptionb(&screen->dev->option_cache, "allow_rgb16_configs") : false;
+    allow_fp16 = dri_loader_get_cap(screen, DRI_LOADER_CAP_FP16);
+ 
+ #define HAS_ZS(fmt) \

@@ -1,0 +1,26 @@
+--- a/src/gallium/auxiliary/target-helpers/drm_helper.h
++++ b/src/gallium/auxiliary/target-helpers/drm_helper.h
+@@ -206,13 +206,22 @@
+ #include "svga/drm/svga_drm_public.h"
+ #include "svga/svga_public.h"
+ 
++#ifdef SVGA_VLKN_WINSYS
++struct svga_winsys_screen *svga_vlkn_winsys_screen_create(void);
++#endif
++
+ static struct pipe_screen *
+ pipe_vmwgfx_create_screen(int fd, const struct pipe_screen_config *config)
+ {
+    struct svga_winsys_screen *sws;
+    struct pipe_screen *screen;
+ 
+-   sws = svga_drm_winsys_screen_create(fd);
++#ifdef SVGA_VLKN_WINSYS
++   if (debug_get_option("SVGA_VLKN_WINSYS", false))
++      sws = svga_vlkn_winsys_screen_create();
++   else
++#endif
++      sws = svga_drm_winsys_screen_create(fd);
+    if (!sws)
+       return NULL;
+ 

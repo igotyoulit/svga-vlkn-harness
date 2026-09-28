@@ -1,0 +1,54 @@
+--- /tmp/clean_dri_context.c	2026-09-28 16:30:33.111320243 -0400
++++ src/gallium/frontends/dri/dri_context.c	2026-09-28 16:30:03.561339577 -0400
+@@ -32,6 +32,7 @@
+ #include "dri_screen.h"
+ #include "dri_drawable.h"
+ #include "dri_context.h"
++#include <stdio.h>
+ #include "frontend/drm_driver.h"
+ 
+ #include "pipe/p_context.h"
+@@ -61,7 +62,7 @@
+       __DRIVER_CONTEXT_ATTRIB_PRIORITY |
+       __DRIVER_CONTEXT_ATTRIB_RELEASE_BEHAVIOR |
+       __DRIVER_CONTEXT_ATTRIB_NO_ERROR;
+-   const struct driOptionCache *optionCache = &screen->dev->option_cache;
++   const struct driOptionCache *optionCache = screen->dev ? &screen->dev->option_cache : NULL;
+ 
+    /* This is effectively doing error checking for GLX context creation (by both
+     * Mesa and the X server) when the driver doesn't support the robustness ext.
+@@ -96,7 +97,7 @@
+       break;
+    case API_OPENGL_COMPAT:
+    case API_OPENGL_CORE:
+-      if (driQueryOptionb(optionCache, "force_compat_profile")) {
++      if (optionCache && driQueryOptionb(optionCache, "force_compat_profile")) {
+          attribs.profile = API_OPENGL_COMPAT;
+       } else {
+          attribs.profile = api == API_OPENGL_COMPAT ? API_OPENGL_COMPAT
+@@ -169,7 +170,7 @@
+     * has errors so don't enable it for setuid processes.
+     */
+    if (debug_get_bool_option("MESA_NO_ERROR", false) ||
+-       driQueryOptionb(&screen->dev->option_cache, "mesa_no_error"))
++       (screen->dev && driQueryOptionb(&screen->dev->option_cache, "mesa_no_error")))
+ #if !defined(_WIN32)
+       if (__normal_user())
+ #endif
+@@ -206,14 +207,14 @@
+     * - app setting
+     * - user setting
+     */
+-   bool enable_glthread = driQueryOptionb(&screen->dev->option_cache, "mesa_glthread_driver");
++   bool enable_glthread = screen->dev ? driQueryOptionb(&screen->dev->option_cache, "mesa_glthread_driver") : false;
+ 
+    /* always disable glthread by default if fewer than 5 "big" CPUs are active */
+    unsigned nr_big_cpus = util_get_cpu_caps()->nr_big_cpus;
+    if (util_get_cpu_caps()->nr_cpus < 4 || (nr_big_cpus && nr_big_cpus < 5))
+       enable_glthread = false;
+ 
+-   int app_enable_glthread = driQueryOptioni(&screen->dev->option_cache, "mesa_glthread_app_profile");
++   int app_enable_glthread = screen->dev ? driQueryOptioni(&screen->dev->option_cache, "mesa_glthread_app_profile") : 0;
+    if (app_enable_glthread != -1) {
+       /* if set (not -1), apply the app setting */
+       enable_glthread = app_enable_glthread == 1;

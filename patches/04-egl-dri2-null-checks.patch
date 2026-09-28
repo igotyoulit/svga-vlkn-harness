@@ -1,0 +1,32 @@
+--- /tmp/clean_egl_dri2.c	2026-09-28 16:30:33.102291700 -0400
++++ src/egl/drivers/dri2/egl_dri2.c	2026-09-28 16:28:47.169295403 -0400
+@@ -293,6 +293,7 @@
+ {
+    struct dri2_egl_config *conf;
+    struct dri2_egl_display *dri2_dpy = dri2_egl_display(disp);
++   if (!dri2_dpy) return NULL;
+    _EGLConfig base;
+    unsigned int attrib, value, double_buffer;
+    bool srgb = false;
+@@ -498,6 +499,9 @@
+    struct dri2_egl_display *dri2_dpy = dri2_egl_display(disp);
+    unsigned int format_count[ARRAY_SIZE(dri2_pbuffer_visuals)] = {0};
+ 
++   if (!dri2_dpy->driver_configs)
++      return;
++
+    for (unsigned i = 0; dri2_dpy->driver_configs[i] != NULL; i++) {
+       struct dri2_egl_config *dri2_conf;
+       EGLint config_group = 0;
+@@ -642,7 +646,11 @@
+ {
+    struct dri2_egl_display *dri2_dpy = dri2_egl_display(disp);
+    struct dri_screen *screen = dri2_dpy->dri_screen_render_gpu;
++   if (!screen)
++      return;
+    struct pipe_screen *pscreen = screen->base.screen;
++   if (!pscreen)
++      return;
+    unsigned int api_mask = screen->api_mask;
+ 
+ #ifdef HAVE_LIBDRM
